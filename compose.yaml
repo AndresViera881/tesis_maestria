@@ -1,0 +1,11 @@
+services:
+  mysql:
+    image: 'mysql:8.0.33'
+    environment:
+      - 'MYSQL_DATABASE=seguridad_db'
+      - 'MYSQL_USER=aviera'
+      - 'MYSQL_PASSWORD=andresviera'
+      - 'MYSQL_ROOT_PASSWORD=andresviera'
+      - 'MYSQL_ALLOW_EMPTY_PASSWORD=no'
+    ports:
+      - '3306:3306'
