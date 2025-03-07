@@ -1,6 +1,6 @@
 package com.application.seguridad.unir.servicesImpl;
 
-import com.application.seguridad.unir.repo.IGenericRepo;
+import com.application.seguridad.unir.repositories.IGenericRepo;
 import com.application.seguridad.unir.services.ICRUD;
 
 import java.util.List;

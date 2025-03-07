@@ -1,29 +1,33 @@
-package com.application.seguridad.unir.dto;
+package com.application.seguridad.unir.model;
 
-import com.application.seguridad.unir.model.Rol;
+import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Data
-public class UserDto {
-    private Integer Id;
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "users")
+public class Usuario {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_user")
+    private Integer idUser;
     private String Identification;
     private String name;
     private String lastName;
     private String email;
     private String username;
     private String password;
-    private List<Rol> roles;
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id_user"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id_role"))
+    private List<Rol> roles = new ArrayList<>();
     private boolean State;
-
-    public Integer getId() {
-        return Id;
-    }
-
-    public void setId(Integer id) {
-        Id = id;
-    }
 
     public String getIdentification() {
         return Identification;
@@ -31,6 +35,14 @@ public class UserDto {
 
     public void setIdentification(String identification) {
         Identification = identification;
+    }
+
+    public Integer getIdUser() {
+        return idUser;
+    }
+
+    public void setIdUser(Integer idUser) {
+        this.idUser = idUser;
     }
 
     public String getName() {
