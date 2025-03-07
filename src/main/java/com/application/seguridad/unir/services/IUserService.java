@@ -1,6 +1,8 @@
 package com.application.seguridad.unir.services;
 
-import com.application.seguridad.unir.model.User;
+import com.application.seguridad.unir.exception.ModeloNotFoundException;
+import com.application.seguridad.unir.model.Usuario;
 
-public interface IUserService extends ICRUD<User, Integer>{
+public interface IUserService extends ICRUD<Usuario, Integer>{
+
 }
