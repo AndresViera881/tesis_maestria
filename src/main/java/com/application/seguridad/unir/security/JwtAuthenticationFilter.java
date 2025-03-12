@@ -40,7 +40,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = obtenerTokenSolicitud(request);
         if(StringUtils.hasText(token) && _jwtGenerador.validarToken(token)){
             String username = _jwtGenerador.obtenerUsernameJWT(token);
-            System.out.println("USERNAME" + " " + username);
             UserDetails userDetails = _customUserDetailsService.loadUserByUsername(username);
             List<String> userRoles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
             if (userRoles.contains("INQUILINO") || userRoles.contains("ADMIN")){

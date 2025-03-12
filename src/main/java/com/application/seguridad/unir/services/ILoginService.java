@@ -1,9 +1,9 @@
 package com.application.seguridad.unir.services;
 
-import com.application.seguridad.unir.model.Usuario;
+import com.application.seguridad.unir.model.User;
 
 import java.util.Optional;
 
 public interface ILoginService {
-    Optional<Usuario> authenticate(String username, String password);
+    Optional<User> authenticate(String username, String password);
 }

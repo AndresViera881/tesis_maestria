@@ -1,6 +1,6 @@
 package com.application.seguridad.unir.servicesImpl;
 
-import com.application.seguridad.unir.model.Usuario;
+import com.application.seguridad.unir.model.User;
 import com.application.seguridad.unir.repositories.ILoginRepo;
 import com.application.seguridad.unir.services.ILoginService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ public class LoginServiceImpl implements ILoginService {
     @Autowired
     private ILoginRepo loginRepo;
     @Override
-    public Optional<Usuario> authenticate(String username, String password) {
+    public Optional<User> authenticate(String username, String password) {
         return loginRepo.findByUsernameAndPassword(username, password);
     }
 }

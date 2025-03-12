@@ -3,40 +3,38 @@ package com.application.seguridad.unir.controller;
 import com.application.seguridad.unir.dto.UserDto;
 import com.application.seguridad.unir.exception.ModeloNotFoundException;
 import com.application.seguridad.unir.model.Rol;
-import com.application.seguridad.unir.model.Usuario;
+import com.application.seguridad.unir.model.User;
 import com.application.seguridad.unir.repositories.IRolRepository;
-import com.application.seguridad.unir.repositories.IUsuarioRepository;
+import com.application.seguridad.unir.repositories.IUserRepository;
 import com.application.seguridad.unir.services.IUserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/inquilinos")
-public class InquilinosController {
+@RequestMapping("/api/users")
+public class UsersController {
 
     private PasswordEncoder _passwordEncoder;
     private IRolRepository _rolRepository;
     private IUserService _usuarioService;
 
-    private IUsuarioRepository _usuarioRepository;
+    private IUserRepository _usuarioRepository;
     @Autowired
     private ModelMapper mapper;
     @Autowired
-    public InquilinosController(
+    public UsersController(
             IUserService usuarioService,
-            IUsuarioRepository usuarioRepository,
+            IUserRepository usuarioRepository,
             PasswordEncoder passwordEncoder,
             IRolRepository rolRepository,
             ModelMapper mapper
@@ -48,25 +46,32 @@ public class InquilinosController {
         this.mapper = mapper;
     }
 
-    @GetMapping("listarInquilinos")
-    public ResponseEntity<List<UserDto>> listarInquilinos() throws Exception {
+    @GetMapping
+    public ResponseEntity<List<UserDto>> listar() throws Exception{
+        List<UserDto> lista = _usuarioService.ListAll().stream().map(p -> mapper.map(p, UserDto.class)).collect(Collectors.toList());
+        return new ResponseEntity<>(lista, HttpStatus.OK);
+    }
+    /*@PreAuthorize("hasRole('ADMIN')")*/
+    @GetMapping("listarAdministradores")
+    public ResponseEntity<List<UserDto>> listarAdministradores() throws Exception {
         List<UserDto> lista = _usuarioService.ListAll().stream()
                 .filter(usuario -> usuario.isState() == true)
                 .filter(usuario -> usuario.getRoles().stream()
-                        .anyMatch(rol -> "INQUILINO".equals(rol.getName())))
+                        .anyMatch(rol -> "ADMIN".equals(rol.getName())))
                 .map(p -> mapper.map(p, UserDto.class))
                 .collect(Collectors.toList());
         return new ResponseEntity<>(lista, HttpStatus.OK);
     }
 
-    @PostMapping("registrarInquilino")
-    public ResponseEntity<Void> registrarInquilino(@RequestBody UserDto dtoRequest) throws Exception {
-        Usuario usuario = mapper.map(dtoRequest, Usuario.class);
+    /*@PreAuthorize("hasRole('ADMIN')")*/
+    @PostMapping("registrarAdministrador")
+    public ResponseEntity<Void> registrarAdministrador(@RequestBody UserDto dtoRequest) throws Exception {
+        User usuario = mapper.map(dtoRequest, User.class);
         usuario.setPassword(_passwordEncoder.encode(dtoRequest.getPassword()));
-        Rol rolInquilino = _rolRepository.findByName("INQUILINO")
-                .orElseThrow(() -> new RuntimeException("Rol INQUILINO no encontrado"));
-        usuario.setRoles(Collections.singletonList(rolInquilino));
-        Usuario usuarioGuardado = _usuarioService.Register(usuario);
+        Rol rolAdministrador = _rolRepository.findByName("ADMIN")
+                .orElseThrow(() -> new RuntimeException("Rol ADMINISTRADOR no encontrado"));
+        usuario.setRoles(Collections.singletonList(rolAdministrador));
+        User usuarioGuardado = _usuarioService.Register(usuario);
         UserDto dtoResponse = mapper.map(usuarioGuardado, UserDto.class);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -76,10 +81,11 @@ public class InquilinosController {
         return ResponseEntity.created(location).build();
     }
 
-    @PutMapping("modificarInquilino/{id}")
-    public ResponseEntity<UserDto> modificarInquilino(@PathVariable Integer id, @RequestBody UserDto dtoRequest) throws Exception {
+    /*@PreAuthorize("hasRole('ADMIN')")*/
+    @PutMapping("modificarAdministrador/{id}")
+    public ResponseEntity<UserDto> modificarAdministrador(@PathVariable Integer id, @RequestBody UserDto dtoRequest) throws Exception {
 
-        Usuario bo = _usuarioService.ListById(id);
+        User bo = _usuarioService.ListById(id);
         if (bo == null) {
             throw new ModeloNotFoundException("ID NO ENCONTRADO: " + id);
         }
@@ -93,7 +99,6 @@ public class InquilinosController {
         if (dtoRequest.getPassword() != null && !dtoRequest.getPassword().isEmpty()) {
             bo.setPassword(_passwordEncoder.encode(dtoRequest.getPassword()));
         }
-
         // No modificar los roles directamente si no se envían en la petición
         if (dtoRequest.getRoles() != null && !dtoRequest.getRoles().isEmpty()) {
             Set<Rol> roles = dtoRequest.getRoles().stream()
@@ -102,21 +107,15 @@ public class InquilinosController {
                     .collect(Collectors.toSet());
             bo.setRoles(new ArrayList<>(roles)); // Convertimos el Set a List para evitar errores de casting
         }
-
-        // Guardar cambios en la base de datos
-        Usuario usuarioActualizado = _usuarioService.Update(bo);
-
-        // Mapeo de respuesta
+        User usuarioActualizado = _usuarioService.Update(bo);
         UserDto dtoResponse = mapper.map(usuarioActualizado, UserDto.class);
-
         return new ResponseEntity<>(dtoResponse, HttpStatus.OK);
     }
 
-
-
-    @DeleteMapping("eliminarInquilino/{id}")
-    public ResponseEntity<Void> eliminarInquilino(@PathVariable("id") Integer id) throws Exception {
-        Usuario obj = _usuarioService.ListById(id);
+    /*@PreAuthorize("hasRole('ADMIN')")*/
+    @DeleteMapping("eliminarAdministrador/{id}")
+    public ResponseEntity<Void> eliminarAdministrador(@PathVariable("id") Integer id) throws Exception {
+        User obj = _usuarioService.ListById(id);
         if (obj == null) {
             throw new ModeloNotFoundException("ID NO ENCONTRADO: " + id);
         }
@@ -124,6 +123,4 @@ public class InquilinosController {
         _usuarioService.Update(obj);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Devuelve 204 No Content para indicar éxito
     }
-
-
 }

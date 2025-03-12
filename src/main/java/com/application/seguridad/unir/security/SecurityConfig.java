@@ -43,7 +43,9 @@ public class SecurityConfig {
                                 .requestMatchers("/api/inquilinos/**").permitAll()  // Permite acceso sin token
                                 // Otras rutas de autenticación
                                 .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/users/**").authenticated()
+                                .requestMatchers("api/reservas/**").permitAll()
+                                .requestMatchers("/api/users/**").permitAll()
+
                                 .anyRequest().authenticated()  // Requiere token para cualquier otra ruta
                 )
                 .httpBasic(Customizer.withDefaults())

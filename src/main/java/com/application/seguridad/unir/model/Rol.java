@@ -30,4 +30,12 @@ public class Rol {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return "Rol{" +
+                "idRole=" + idRole +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }
