@@ -101,7 +101,21 @@ public class BookingControlller {
     }
 
 
-
-
-
+    @PutMapping("cancelarReserva/{id}")
+    public ResponseEntity<Void> cancelarReserva(@PathVariable Integer id) throws Exception {
+        Booking reserva = _bookingService.ListById(id);
+        if (reserva == null) {
+            throw new ModeloNotFoundException("BOOKING NOT FOUND: " + id);
+        }
+        // Asignar estado '2' (Cancelado)
+        Optional<StateBooking> estadoCancelado = _stateBookingRepository.findById(2);
+        if (estadoCancelado.isPresent()) {
+            reserva.setStateBooking(estadoCancelado.get());
+        } else {
+            throw new ModeloNotFoundException("STATE BOOKING NOT FOUND: 2");
+        }
+        // Guardar cambios
+        _bookingService.Update(reserva);
+        return ResponseEntity.noContent().build();
+    }
 }
