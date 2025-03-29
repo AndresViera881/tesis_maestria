@@ -113,6 +113,11 @@ public class User {
         this.bookings = bookings;
     }
 
+    public Integer getId() {
+        return idUser;
+    }
+
+
     @Override
     public String toString() {
         return "User{id=" + idUser + ", username='" + username + "', email='" + email + "'}";

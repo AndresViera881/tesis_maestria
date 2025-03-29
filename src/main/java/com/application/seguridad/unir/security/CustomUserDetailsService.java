@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
-
     @Autowired
     private IUserRepository _userRepository;
 
@@ -28,18 +27,24 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .collect(Collectors.toList());
     }
 
-    // Método para cargar el usuario por su username
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // Buscar el usuario en el repositorio
         User user = _userRepository.findByUsernameWithRoles(username);
-        // Obtener los roles del usuario
+
+        // Obtener los roles
         List<Rol> roles = user.getRoles() != null ? user.getRoles() : List.of();
-        // Mapear los roles a authorities y devolver un UserDetails con el usuario, la contraseña y los roles
-        return new org.springframework.security.core.userdetails.User(
+
+        // Convertir roles a authorities
+        Collection<GrantedAuthority> authorities = mapToAuthorities(roles);
+
+        // Devolver CustomUserDetails con ID
+        return new CustomUserDetails(
+                user.getId(),             // Asumiendo que user tiene getId()
                 user.getUsername(),
                 user.getPassword(),
-                mapToAuthorities(roles)  // Convertir los roles en authorities
+                authorities
         );
     }
+
 }

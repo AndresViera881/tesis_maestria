@@ -15,31 +15,32 @@ import java.util.stream.Collectors;
 public class JwtGenerador {
     // Método para generar el token con username y rol
     public String generarToken(Authentication authentication) {
-        String username = authentication.getName();
+        // 👇 Obtenemos el usuario autenticado con ID
+        CustomUserDetails usuario = (CustomUserDetails) authentication.getPrincipal();
+        String username = usuario.getUsername();
+        Integer id = usuario.getId();
 
-        // Obtener los roles del usuario como una lista separada por comas
+        // 👇 Obtener los roles
         String roles = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(",")); // Convierte la lista en una cadena separada por comas
+                .collect(Collectors.joining(","));
 
         Date tiempoActual = new Date();
         Date expiracionToken = new Date(tiempoActual.getTime() + ConstantesSeguridad.JWT_EXPIRATION_TOKEN);
 
-        // Crear claims personalizados para incluir los roles
+        // 👇 Claims personalizados
         Map<String, Object> claims = new HashMap<>();
         claims.put("rol", roles);
+        claims.put("id", id); // 👈 Agregamos el ID al token
 
-        // Generar el token con claims
-        String token = Jwts.builder()
-                .setClaims(claims) // Agregar claims personalizados
-                .setSubject(username) // Establecer el usuario como subject
-                .setIssuedAt(tiempoActual) // Fecha de emisión
-                .setExpiration(expiracionToken) // Fecha de expiración
-                .signWith(SignatureAlgorithm.HS512, ConstantesSeguridad.JWT_FIRMA) // Firmar el token
+        // 👇 Construir el token
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(username)
+                .setIssuedAt(tiempoActual)
+                .setExpiration(expiracionToken)
+                .signWith(SignatureAlgorithm.HS512, ConstantesSeguridad.JWT_FIRMA)
                 .compact();
-
-        System.out.println("TOKEN: " + token);
-        return token;
     }
 
     // Método para extraer el username desde el token
