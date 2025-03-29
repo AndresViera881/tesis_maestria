@@ -23,36 +23,31 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 // cual contendra toda la configuracion referente a la seguridad
 @EnableWebSecurity
 public class SecurityConfig {
-    private final CustomUserDetailsService _userDetailsService;
 
+    private final CustomUserDetailsService _userDetailsService;
     private final JwtAuthenticationFilter _jwtAuthenticationFilter;
+
     public SecurityConfig(CustomUserDetailsService userDetailsService, JwtAuthenticationFilter jwtAuthenticationFilter) {
         this._userDetailsService = userDetailsService;
         this._jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
-        //@Bean para establecer una cadena de filtros de seguridad en nuestra aplicacion
-    //Y es aqui donde determinaremos los permisos segun los roles de usuarios para acceder a la aplicacion.
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(authorizeRequests ->
-                        // Permitir acceso sin token para los inquilinos
-                        authorizeRequests
-                                .requestMatchers("/api/inquilinos/**").permitAll()  // Permite acceso sin token
-                                // Otras rutas de autenticación
-                                .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("api/reservas/**").permitAll()
-                                .requestMatchers("/api/users/**").permitAll()
-
-                                .anyRequest().authenticated()  // Requiere token para cualquier otra ruta
+                .cors(cors -> cors.configure(httpSecurity))
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                        .requestMatchers("/api/auth/**").permitAll()    // ✅ Permitir acceso sin token al login
+                        .requestMatchers("/api/inquilinos/**").permitAll()
+                        .requestMatchers("/api/users/**").permitAll()
+                        .requestMatchers("/api/reservas/**").authenticated()
+                        .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults())
-                        .addFilterBefore(_jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(_jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .httpBasic(Customizer.withDefaults());
         return httpSecurity.build();
     }
-
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder(14);
@@ -74,5 +69,6 @@ public class SecurityConfig {
     ) throws Exception {
         return configuration.getAuthenticationManager();
     }
-
 }
+
+
