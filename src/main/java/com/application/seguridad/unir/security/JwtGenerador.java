@@ -31,7 +31,7 @@ public class JwtGenerador {
         // 👇 Claims personalizados
         Map<String, Object> claims = new HashMap<>();
         claims.put("rol", roles);
-        claims.put("id", id); // 👈 Agregamos el ID al token
+        claims.put("id", id); // Agregamos el ID al token
 
         // 👇 Construir el token
         return Jwts.builder()
