@@ -32,13 +32,14 @@ public class SecurityConfig {
         this._jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configure(httpSecurity))
+                .cors(Customizer.withDefaults()) // ✅ CORRECTO
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers("/api/auth/**").permitAll()    // ✅ Permitir acceso sin token al login
+                        .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/inquilinos/**").permitAll()
                         .requestMatchers("/api/users/**").permitAll()
                         .requestMatchers("/api/reservas/**").authenticated()
@@ -46,8 +47,10 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(_jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(Customizer.withDefaults());
+
         return httpSecurity.build();
     }
+
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder(14);
